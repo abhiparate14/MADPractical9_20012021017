@@ -1,11 +1,13 @@
 package com.example.madpractical9_20012021017
 
 import android.app.Activity
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Binder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Telephony
 import android.widget.ListView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,10 +17,11 @@ import com.example.madpractical9_20012021017.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     val SMS_PERMISSION_CODE = 110
-    private lateinit var binder: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     private lateinit var al:ArrayList<SMSView>
     private lateinit var lv:ListView
+    private lateinit var smsreceiver: smsbroadcastreciever
 
     private fun requestSMSPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_SMS)) {
@@ -28,6 +31,7 @@ class MainActivity : AppCompatActivity() {
             android.Manifest.permission.RECEIVE_SMS),
             SMS_PERMISSION_CODE)
     }
+
     private val isSMSReadPermission: Boolean
         get() = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
     private val isSMSWritePermission: Boolean
@@ -51,5 +55,22 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        al = ArrayList()
+        lv = binding.listview1
+
+        if (checkRequestPermission()) {
+            loadSMSInbox()
+        }
+        smsreceiver = smsbroadcastreciever()
+        registerReceiver(smsreceiver, IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION))
+        smsreceiver.listner = ListernerImplement()
+    }
+
+    inner class ListernerImplement:smsbroadcastreciever.Listerner{
+        override fun onTextReceived(sPhoneNo: String?, sMsg: String?) {
+
+        }
     }
 }
