@@ -1,18 +1,16 @@
 package com.example.madpractical9_20012021017
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Binder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Telephony
+import android.telephony.SmsManager
 import android.widget.ListView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.PackageManagerCompat
 import com.example.madpractical9_20012021017.databinding.ActivityMainBinding
 
 
@@ -66,10 +64,21 @@ class MainActivity : AppCompatActivity() {
         }
         smsreceiver = smsbroadcastreciever()
         registerReceiver(smsreceiver, IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION))
-        smsreceiver.listner = ListernerImplement()
+        smsreceiver.listner = ListenerImplement()
     }
 
-    inner class ListernerImplement:smsbroadcastreciever.Listerner{
+    fun SendSms(sPhoneNo: String, sMsg: String){
+        if(!checkRequestPermission()){
+//            if you like add toast message
+            return
+        }
+        val smsmanager = SmsManager.getDefault()
+        if(smsmanager != null) {
+            smsmanager.sendTextMessage(sPhoneNo, null, sMsg, null, null)
+        }
+    }
+
+    inner class ListenerImplement:smsbroadcastreciever.Listerner{
         override fun onTextReceived(sPhoneNo: String, sMsg: String) {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
             builder.setTitle("New SMS Received")
@@ -78,5 +87,10 @@ class MainActivity : AppCompatActivity() {
             builder.show()
             loadSMSInbox()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(smsreceiver)
     }
 }
