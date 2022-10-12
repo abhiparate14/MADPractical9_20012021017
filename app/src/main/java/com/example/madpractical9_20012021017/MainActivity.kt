@@ -1,6 +1,7 @@
 package com.example.madpractical9_20012021017
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -69,8 +70,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class ListernerImplement:smsbroadcastreciever.Listerner{
-        override fun onTextReceived(sPhoneNo: String?, sMsg: String?) {
-
+        override fun onTextReceived(sPhoneNo: String, sMsg: String) {
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
+            builder.setTitle("New SMS Received")
+            builder.setMessage("$sPhoneNo\n$sMsg")
+            builder.setCancelable(true)
+            builder.show()
+            loadSMSInbox()
         }
     }
 }
