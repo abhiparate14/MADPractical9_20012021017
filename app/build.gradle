@@ -32,6 +32,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'com.example.madpractical9_20012021017'
 }
 
 dependencies {
