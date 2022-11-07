@@ -37,7 +37,10 @@ class MainActivity : AppCompatActivity() {
         get() = ContextCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
 
     private fun checkRequestPermission():Boolean {
-        return isSMSReadPermission && isSMSWritePermission
+        return if (!isSMSReadPermission || !isSMSWritePermission) {
+            requestSMSPermission()
+            false
+        } else true
     }
 
     private fun loadSMSInbox() {
@@ -53,24 +56,42 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         al = ArrayList()
-        lv = binding.listview1
+        lv = binding.listview
 
         if (checkRequestPermission()) {
             loadSMSInbox()
         }
+        else
+        {
+            checkRequestPermission()
+        }
         smsreceiver = smsbroadcastreciever()
         registerReceiver(smsreceiver, IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION))
         smsreceiver.listner = ListenerImplement()
+        binding.sendButton.setOnClickListener {
+            val phone = binding.phoneno.text.toString()
+            val msg = binding.message.text.toString()
+            SendSms(phone, msg)
+            val builder: androidx.appcompat.app.AlertDialog.Builder = androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
+            builder.setTitle("Sent SMS")
+            builder.setMessage("SMS is sent.\nPhone No : $phone \n\n Message : $msg")
+            builder.setCancelable(true)
+            builder.setPositiveButton("OK", null);
+            builder.show()
+        }
     }
 
     fun SendSms(sPhoneNo: String, sMsg: String){
         if(!checkRequestPermission()){
 //            if you like add toast message
             return
+        }
+        else
+        {
+            checkRequestPermission()
         }
         val smsmanager = SmsManager.getDefault()
         if(smsmanager != null) {
